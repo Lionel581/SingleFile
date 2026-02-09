@@ -30,14 +30,21 @@ export {
 
 async function onMessage(message, sender) {
 	if (message.method.endsWith(".init")) {
-		// Nuclear option: force storage reset to ensure hardcoded defaults apply
+		// One-time storage reset to ensure hardcoded defaults apply.
+		// Set a flag after first successful reset so we don't wipe users repeatedly.
 		try {
-			await browser.storage.local.clear();
-			if (browser.storage.sync) {
-				await browser.storage.sync.clear();
+			const store = browser.storage.local;
+			const markerKey = '__hardcode_defaults_applied__';
+			const marker = (await store.get(markerKey))[markerKey];
+			if (!marker) {
+				await store.clear();
+				if (browser.storage.sync) {
+					await browser.storage.sync.clear();
+				}
+				await store.set({ [markerKey]: true });
 			}
 		} catch (e) {
-			// ignore storage clear errors
+			// ignore storage errors
 		}
 
 		const [optionsAutoSave, options, autoSaveEnabled] = await Promise.all([config.getOptions(sender.tab.url, true), config.getOptions(sender.tab.url), autoSaveIsEnabled(sender.tab)]);
