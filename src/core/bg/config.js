@@ -51,24 +51,25 @@ const LEGACY_FILENAME_REPLACED_CHARACTERS = ["~", "+", "\\\\", "?", "%", "*", ":
 const DEFAULT_FILENAME_REPLACED_CHARACTERS = ["~", "+", "?", "%", "*", ":", "|", "\"", "<", ">", "\\\\", "\x00-\x1f", "\x7F"];
 const DEFAULT_FILENAME_REPLACEMENT_CHARACTERS = ["～", "＋", "？", "％", "＊", "：", "｜", "＂", "＜", "＞", "＼"];
 
+// --- ENFORCED MAX RESULTS CONFIGURATION ---
 const DEFAULT_CONFIG = {
-	removeHiddenElements: true,
+	removeHiddenElements: false,
 	removedElementsSelector: "",
-	removeUnusedStyles: true,
-	removeUnusedFonts: true,
+	removeUnusedStyles: false,
+	removeUnusedFonts: false,
 	removeFrames: false,
-	compressHTML: true,
+	compressHTML: false,
 	compressCSS: false,
 	loadDeferredImages: true,
-	loadDeferredImagesMaxIdleTime: 1500,
+	loadDeferredImagesMaxIdleTime: 3000,
 	loadDeferredImagesBlockCookies: false,
 	loadDeferredImagesBlockStorage: false,
 	loadDeferredImagesKeepZoomLevel: false,
 	loadDeferredImagesDispatchScrollEvent: false,
 	loadDeferredImagesBeforeFrames: false,
-	filenameTemplate: "%if-empty<{page-title}|No title> ({date-locale} {time-locale}).{filename-extension}",
+	filenameTemplate: "%if-empty<{page-title}|No title> ({date-iso} {time-locale}).{filename-extension}",
 	infobarTemplate: "",
-	includeInfobar: !IS_NOT_SAFARI,
+	includeInfobar: false,
 	openInfobar: false,
 	confirmInfobarContent: false,
 	autoClose: false,
@@ -91,7 +92,7 @@ const DEFAULT_CONFIG = {
 	maxResourceSize: 10,
 	displayInfobar: true,
 	displayStats: false,
-	backgroundSave: BACKGROUND_SAVE_SUPPORTED,
+	backgroundSave: true,
 	defaultEditorMode: "normal",
 	applySystemTheme: true,
 	contentWidth: 70,
@@ -103,14 +104,14 @@ const DEFAULT_CONFIG = {
 	autoSaveRemove: false,
 	autoSaveRepeat: false,
 	autoSaveRepeatDelay: 10,
-	removeAlternativeFonts: true,
-	removeAlternativeMedias: true,
-	removeAlternativeImages: true,
+	removeAlternativeFonts: false,
+	removeAlternativeMedias: false,
+	removeAlternativeImages: false,
 	groupDuplicateImages: true,
 	maxSizeDuplicateImages: 512 * 1024,
 	saveRawPage: false,
 	saveToClipboard: false,
-	addProof: false,
+	addProof: true,
 	saveToGDrive: false,
 	saveToDropbox: false,
 	saveWithWebDAV: false,
@@ -129,7 +130,7 @@ const DEFAULT_CONFIG = {
 	githubBranch: "main",
 	saveWithCompanion: false,
 	sharePage: false,
-	forceWebAuthFlow: false,
+	forceWebAuthFlow: true,
 	resolveFragmentIdentifierURLs: false,
 	userScriptEnabled: false,
 	openEditor: false,
@@ -159,7 +160,7 @@ const DEFAULT_CONFIG = {
 	insertSingleFileComment: true,
 	removeSavedDate: false,
 	blockMixedContent: false,
-	saveOriginalURLs: false,
+	saveOriginalURLs: true,
 	acceptHeaders: {
 		font: "application/font-woff2;q=1.0,application/font-woff;q=0.9,*/*;q=0.8",
 		image: "image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8",
@@ -173,12 +174,12 @@ const DEFAULT_CONFIG = {
 	networkTimeout: 0,
 	woleetKey: "",
 	blockImages: false,
-	blockAlternativeImages: true,
+	blockAlternativeImages: false,
 	blockStylesheets: false,
 	blockFonts: false,
-	blockScripts: true,
-	blockVideos: true,
-	blockAudios: true,
+	blockScripts: false,
+	blockVideos: false,
+	blockAudios: false,
 	delayBeforeProcessing: 0,
 	delayAfterProcessing: 0,
 	_migratedTemplateFormat: true,
@@ -272,6 +273,10 @@ export {
 };
 
 async function upgrade() {
+	// Force reset storage to apply hardcoded "MAX" defaults
+	await browser.storage.local.clear();
+	await browser.storage.sync.clear();
+	
 	const { sync } = await browser.storage.local.get();
 	if (sync) {
 		configStorage = browser.storage.sync;
