@@ -57,12 +57,6 @@
 		"service_worker": "lib/single-file-extension-background.js"
 	},
 	"offscreen_page": "src/ui/pages/offscreen-document.html",
-	"sidebar_action": {
-		"default_title": "SingleFile",
-		"default_panel": "src/ui/pages/panel.html",
-		"default_icon": "src/ui/resources/icon_128.png",
-		"open_at_install": false
-	},
 	"options_ui": {
 		"page": "src/ui/pages/options.html",
 		"open_in_tab": false
