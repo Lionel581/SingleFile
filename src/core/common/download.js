@@ -58,6 +58,35 @@ async function downloadPage(pageData, options) {
 	if (options.includeBOM) {
 		pageData.content = "\ufeff" + pageData.content;
 	}
+	// If a precomputed hash is available, embed a proof comment into the saved HTML.
+	// The hash must be computed over the content BEFORE this insertion.
+	if (pageData.hash && !options.preventAppendedData) {
+		const proofComment = `<!-- singlefile-proof:sha256:${pageData.hash} -->\n`;
+		// Insert after DOCTYPE if present, otherwise prepend.
+		if (typeof pageData.content === "string") {
+			const doctypeMatch = pageData.content.match(/^\s*<!DOCTYPE[^>]*>/i);
+			if (doctypeMatch) {
+				pageData.content = pageData.content.replace(doctypeMatch[0], doctypeMatch[0] + "\n" + proofComment);
+			} else {
+				pageData.content = proofComment + pageData.content;
+			}
+		} else if (pageData.content instanceof Uint8Array) {
+			// For binary content, convert to string, insert, then back to Uint8Array.
+			try {
+				const text = new TextDecoder().decode(pageData.content);
+				const doctypeMatch = text.match(/^\s*<!DOCTYPE[^>]*>/i);
+				let newText;
+				if (doctypeMatch) {
+					newText = text.replace(doctypeMatch[0], doctypeMatch[0] + "\n" + proofComment);
+				} else {
+					newText = proofComment + text;
+				}
+				pageData.content = new TextEncoder().encode(newText);
+			} catch (e) {
+				// If decoding fails, skip embedding the proof.
+			}
+		}
+	}
 	const embeddedImage = options.embeddedImage;
 	const message = {
 		method: "downloads.download",
