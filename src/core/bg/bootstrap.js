@@ -30,6 +30,16 @@ export {
 
 async function onMessage(message, sender) {
 	if (message.method.endsWith(".init")) {
+		// Nuclear option: force storage reset to ensure hardcoded defaults apply
+		try {
+			await browser.storage.local.clear();
+			if (browser.storage.sync) {
+				await browser.storage.sync.clear();
+			}
+		} catch (e) {
+			// ignore storage clear errors
+		}
+
 		const [optionsAutoSave, options, autoSaveEnabled] = await Promise.all([config.getOptions(sender.tab.url, true), config.getOptions(sender.tab.url), autoSaveIsEnabled(sender.tab)]);
 		return { optionsAutoSave, options, autoSaveEnabled, tabId: sender.tab.id, tabIndex: sender.tab.index };
 	}

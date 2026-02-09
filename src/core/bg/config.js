@@ -67,7 +67,8 @@ const DEFAULT_CONFIG = {
 	loadDeferredImagesKeepZoomLevel: false,
 	loadDeferredImagesDispatchScrollEvent: false,
 	loadDeferredImagesBeforeFrames: false,
-	filenameTemplate: "%if-empty<{page-title}|No title> ({date-iso} {time-locale}).{filename-extension}",
+	// Enforce ISO filename template for forensic-grade exports
+	filenameTemplate: "{page-title} ({date-iso} {time-locale}).html",
 	infobarTemplate: "",
 	includeInfobar: false,
 	openInfobar: false,
